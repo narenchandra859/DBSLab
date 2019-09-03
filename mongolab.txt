@@ -1,0 +1,57 @@
+> use someDB
+switched to db someDB
+> db.createCollection("someUser")
+{ "ok" : 1 }
+> db.someUser.insertMany([{Name: "A", Age: 20, Lang:"Java"}, {Name: "B", Age: 21, Lang:"PHP"}])
+{
+	"acknowledged" : true,
+	"insertedIds" : [
+		ObjectId("5d6e3dfd11e62c0736a488c5"),
+		ObjectId("5d6e3dfd11e62c0736a488c6")
+	]
+}
+> db.someUser.insertMany([{Name: "C", Age: 20, Lang:"Python"}, {Name: "B", Age: 21, Lang:"C++"}])
+{
+	"acknowledged" : true,
+	"insertedIds" : [
+		ObjectId("5d6e3e0c11e62c0736a488c7"),
+		ObjectId("5d6e3e0c11e62c0736a488c8")
+	]
+}
+> db.someUser.find()
+{ "_id" : ObjectId("5d6e3dfd11e62c0736a488c5"), "Name" : "A", "Age" : 20, "Lang" : "Java" }
+{ "_id" : ObjectId("5d6e3dfd11e62c0736a488c6"), "Name" : "B", "Age" : 21, "Lang" : "PHP" }
+{ "_id" : ObjectId("5d6e3e0c11e62c0736a488c7"), "Name" : "C", "Age" : 20, "Lang" : "Python" }
+{ "_id" : ObjectId("5d6e3e0c11e62c0736a488c8"), "Name" : "B", "Age" : 21, "Lang" : "C++" }
+
+/* limit, aggregate(sort + avg) */
+
+> db.someUser.find({ Age: {$gt:15}})
+{ "_id" : ObjectId("5d6e3dfd11e62c0736a488c5"), "Name" : "A", "Age" : 20, "Lang" : "Java" }
+{ "_id" : ObjectId("5d6e3dfd11e62c0736a488c6"), "Name" : "B", "Age" : 21, "Lang" : "PHP" }
+{ "_id" : ObjectId("5d6e3e0c11e62c0736a488c7"), "Name" : "C", "Age" : 20, "Lang" : "Python" }
+{ "_id" : ObjectId("5d6e3e0c11e62c0736a488c8"), "Name" : "B", "Age" : 21, "Lang" : "C++" }
+> db.someUser.find({ Age: {$gt:25}})
+> db.someUser.find({ Age: {$gt:20}})
+{ "_id" : ObjectId("5d6e3dfd11e62c0736a488c6"), "Name" : "B", "Age" : 21, "Lang" : "PHP" }
+{ "_id" : ObjectId("5d6e3e0c11e62c0736a488c8"), "Name" : "B", "Age" : 21, "Lang" : "C++" }
+
+> db.someUser.aggregate( {$sort: { Age:-1 }} )
+{ "_id" : ObjectId("5d6e3dfd11e62c0736a488c6"), "Name" : "B", "Age" : 21, "Lang" : "PHP" }
+{ "_id" : ObjectId("5d6e3e0c11e62c0736a488c8"), "Name" : "B", "Age" : 21, "Lang" : "C++" }
+{ "_id" : ObjectId("5d6e3dfd11e62c0736a488c5"), "Name" : "A", "Age" : 20, "Lang" : "Java" }
+{ "_id" : ObjectId("5d6e3e0c11e62c0736a488c7"), "Name" : "C", "Age" : 20, "Lang" : "Python" }
+> 
+> db.someUser.aggregate([{ $group: { _id: "$Name", avgAge: { $avg: "$Age" } } }])
+{ "_id" : "B", "avgAge" : 21 }
+{ "_id" : "C", "avgAge" : 20 }
+
+> db.someUser.aggregate([{ $group: { _id: "emptyID", avgAge: { $avg: "$Age" } } }])
+{ "_id" : "emptyID", "avgAge" : 20.5 }
+> 
+
+
+{ "_id" : "A", "avgAge" : 20 }
+> 
+
+
